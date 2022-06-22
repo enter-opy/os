@@ -7,7 +7,7 @@ int main(void) {
 	printf("Enter number of processes: ");
 	scanf("%d", &n);
 
-	int a[n][4], order[n];
+	int a[n][5], order[n];
 
 	printf("Enter the arrival time and burst time of each process\n");
 	for (int i = 0; i < n; i++) {
@@ -17,13 +17,13 @@ int main(void) {
 		printf("Enter burst time of process%d: ", i);
 		scanf("%d", &a[i][1]);
 
-		order[i] = i;
+		a[i][4] = i;
 	}
 
 	for (int i = 0; i < n - 1; i++) {
 		min = i;
 		for (int j = i; j < n; j++) {
-			if (a[j][1] < a[j][min]) {
+			if (a[j][1] < a[min][1]) {
 				min = j;
 			}
 		}
@@ -44,8 +44,9 @@ int main(void) {
 		a[i][3] = a[min][3];
 		a[min][3] = temp;
 
-		order[i] = min;
-		order[min] = i;
+		temp = a[i][4];
+		a[i][4] = a[min][4];
+		a[min][4] = temp;
 	}
 		
 	
@@ -67,7 +68,7 @@ int main(void) {
 	printf("Process\tAT\tBT\tTAT\tWT\n");
 
 	for (int i = 0; i < n; i++) {
-		printf("P%d\t%d\t%d\t%d\t%d\n", order[i], a[i][0], a[i][1], a[i][2], a[i][3]);
+		printf("P%d\t%d\t%d\t%d\t%d\n", a[i][4], a[i][0], a[i][1], a[i][2], a[i][3]);
 		tsum += a[i][2];
 		wsum += a[i][3];
 	}
