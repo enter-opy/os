@@ -1,85 +1,105 @@
+#include <stdlib.h>
 #include <stdio.h>
 
-int main(void) {
-	int n, clock = 0, min, temp;
-	float tsum = 0, wsum = 0;
 
-	printf("Enter number of processes: ");
-	scanf("%d", &n);
+void main()
+{
 
-	int a[n][6];
+    int pn = 0;                 
+    int CPU = 0;            
+    int allTime = 0;        
+    printf("Enter Processes Count: ");
+    scanf("%d",&pn);
+    int AT[pn];
+    int ATt[pn];
+    int NoP = pn;
+    int PT[pn];             
+    int PP[pn];             
+    int PPt[pn];
+    int waittingTime[pn];
+    int turnaroundTime[pn];
+    int i=0;
+    
+    for(i=0 ;i<pn ;i++){
+        printf("\nProcessing time for P%d: ",i+1);
+        scanf("%d",&PT[i]);
+        printf("Priority for P%d: ",i+1);
+        scanf("%d",&PP[i]);
+        PPt[i] = PP[i];
+        printf("Arrival Time for P%d: ",i+1);
+        scanf("%d",&AT[i]);
+        ATt[i] = AT[i];
+    }
+    int LAT = 0;        
+    for(i = 0; i < pn; i++)
+        if(AT[i] > LAT)
+            LAT = AT[i];
+    int MAX_P = 0;        
+    for(i = 0; i < pn; i++)
+        if(PPt[i] > MAX_P)
+            MAX_P = PPt[i];
+    int ATi = 0;        
+    int P1 = PPt[0];     
+    int P2 = PPt[0];     
 
-	printf("Enter the arrival time and burst time of each process\n");
-	for (int i = 0; i < n; i++) {
-		printf("Enter arrival time of process%d: ", i);
-		scanf("%d", &a[i][0]);
-	
-		printf("Enter burst time of process%d: ", i);
-		scanf("%d", &a[i][1]);
+    
+    int j = -1;
+    while(NoP > 0 && CPU <= 1000)
+	{
+        for(i = 0; i < pn; i++)
+	{
+            if((ATt[i] <= CPU) && (ATt[i] != (LAT+10)))
+	    {
+                if(PPt[i] != (MAX_P+1))
+		{
+                    P2 = PPt[i];
+                    j= 1;
 
-		printf("Enter priority of process%d: ", i);
-		scanf("%d", &a[i][4]);
+                    if(P2 < P1)
+		    {
+                        j= 1;
+                        ATi = i;
+                        P1 = PPt[i];
+                        P2 = PPt[i];
+                    }
+                }
+             }
+         }
 
-		a[i][5] = i;
-	}
+        if(j == -1)
+	{
+            CPU = CPU+1;
+            continue;
+        }
+        else
+	{
+            waittingTime[ATi] = CPU - ATt[ATi];
+            CPU = CPU + PT[ATi];
+            turnaroundTime[ATi] = CPU - ATt[ATi];
+            ATt[ATi] = LAT +10;
+            j = -1;
+            PPt[ATi] = MAX_P + 1;
+            ATi = 0;        
+            P1 = MAX_P+1;     
+            P2 = MAX_P+1;     
+            NoP = NoP - 1;
+        }
+    }
+    printf("\nPN\tPT\tPP\tAT\tWT\tTT\n\n");
+    for(i = 0; i < pn; i++)
+	{
+       	 printf("P%d\t%d\t%d\t%d\t%d\t%d\n",i+1,PT[i],PP[i],AT[i],waittingTime[i],turnaroundTime[i]);
+    	}
 
-	for (int i = 0; i < n - 1; i++) {
-		min = i;
-		for (int j = i; j < n; j++) {
-			if (a[j][4] < a[j][min]) {
-				min = j;
-			}
-		}
-		
-		temp = a[i][0];
-		a[i][0] = a[min][0];
-		a[min][0] = temp;
+    int AvgWT = 0;
+    int AVGTaT = 0;
+    for(i = 0; i < pn; i++)
+    {
+        AvgWT = waittingTime[i] + AvgWT;
+        AVGTaT = turnaroundTime[i] + AVGTaT;
+    }
 
-		temp = a[i][1];
-		a[i][1] = a[min][1];
-		a[min][1] = temp;
 
-		temp = a[i][2];
-		a[i][2] = a[min][2];
-		a[min][2] = temp;
+   printf("AvgWaittingTime = %d\nAvgTurnaroundTime = %d\n",AvgWT/pn,AVGTaT/pn);
 
-		temp = a[i][3];
-		a[i][3] = a[min][3];
-		a[min][3] = temp;
-
-		temp = a[i][4];
-		a[i][4] = a[min][4];
-		a[min][4] = temp;
-
-		temp = a[i][5];
-		a[i][5] = a[min][5];
-		a[min][5] = temp;
-	}
-		
-	
-	a[0][2] = a[0][1];
-	a[0][3] = 0;
-	clock = a[0][0] + a[0][1];
-	for (int i = 1; i < n; i++) {
-		if (a[i][0] > clock) {
-			clock += a[i][1];
-			a[i][2] = a[i][1];
-			a[i][3] = 0;
-			continue;
-		}
-		clock += a[i][1];
-		a[i][2] = clock - a[i][0];
-		a[i][3] = a[i][2] - a[i][1]; 
-	}
-
-	printf("Process\tAT\tBT\tTAT\tWT\tPriority\n");
-
-	for (int i = 0; i < n; i++) {
-		printf("P%d\t%d\t%d\t%d\t%d\t%d\n", a[i][5], a[i][0], a[i][1], a[i][2], a[i][3], a[i][4]);
-		tsum += a[i][2];
-		wsum += a[i][3];
-	}
-
-	printf("Average turnaround time = %f\n", tsum / n);
-	printf("Average waiting time = %f\n", wsum / n);
 }

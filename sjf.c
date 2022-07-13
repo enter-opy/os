@@ -1,78 +1,119 @@
-#include <stdio.h>
-
-int main(void) {
-	int n, clock = 0, min, temp;
-	float tsum = 0, wsum = 0;
-
-	printf("Enter number of processes: ");
-	scanf("%d", &n);
-
-	int a[n][5], order[n];
-
-	printf("Enter the arrival time and burst time of each process\n");
-	for (int i = 0; i < n; i++) {
-		printf("Enter arrival time of process%d: ", i);
-		scanf("%d", &a[i][0]);
-	
-		printf("Enter burst time of process%d: ", i);
-		scanf("%d", &a[i][1]);
-
-		a[i][4] = i;
-	}
-
-	for (int i = 0; i < n - 1; i++) {
-		min = i;
-		for (int j = i; j < n; j++) {
-			if (a[j][1] < a[min][1]) {
-				min = j;
-			}
-		}
-		
-		temp = a[i][0];
-		a[i][0] = a[min][0];
-		a[min][0] = temp;
-
-		temp = a[i][1];
-		a[i][1] = a[min][1];
-		a[min][1] = temp;
-
-		temp = a[i][2];
-		a[i][2] = a[min][2];
-		a[min][2] = temp;
-
-		temp = a[i][3];
-		a[i][3] = a[min][3];
-		a[min][3] = temp;
-
-		temp = a[i][4];
-		a[i][4] = a[min][4];
-		a[min][4] = temp;
-	}
-		
-	
-	a[0][2] = a[0][1];
-	a[0][3] = 0;
-	clock = a[0][0] + a[0][1];
-	for (int i = 1; i < n; i++) {
-		if (a[i][0] > clock) {
-			clock += a[i][1];
-			a[i][2] = a[i][1];
-			a[i][3] = 0;
-			continue;
-		}
-		clock += a[i][1];
-		a[i][2] = clock - a[i][0];
-		a[i][3] = a[i][2] - a[i][1];
-	}
-
-	printf("Process\tAT\tBT\tTAT\tWT\n");
-
-	for (int i = 0; i < n; i++) {
-		printf("P%d\t%d\t%d\t%d\t%d\n", a[i][4], a[i][0], a[i][1], a[i][2], a[i][3]);
-		tsum += a[i][2];
-		wsum += a[i][3];
-	}
-
-	printf("Average turnaround time = %f\n", tsum / n);
-	printf("Average waiting time = %f\n", wsum / n);
+#include<stdio.h>
+#include<stdlib.h>
+void swap(int *x, int *y)
+{
+    int temp=*x;
+    *x=*y;
+    *y=temp;
 }
+void sortat(int p[], int at[], int bt[], int n)
+{
+  int i, j;
+  for(i=0;i<n;i++)
+  {
+      for(j=i+1;j<n;j++)
+      {   
+	  if(at[i]>at[j])
+	  { 
+	        swap(&p[i], &p[j]);
+		swap(&at[i], &at[j]);
+		swap(&bt[i], &bt[j]);
+	   }
+           
+	   else if(at[i]==at[j])
+	   {
+	      if(bt[i]>bt[j])
+                 swap(&p[i], &p[j]);
+                 swap(&at[i], &at[j]);
+                 swap(&bt[i], &bt[j]);
+	   }
+       }
+  }
+}
+
+void tatwt( int ct[], int at[], int bt[], int tat[], int wt[], int n)
+{
+   int i;
+   for(i=0;i<n;i++)
+   {
+	tat[i]=ct[i]-at[i];
+	wt[i]=tat[i]-bt[i];
+   }
+}
+int main()
+{
+  int *p, *at, *bt, *tat, *wt, *ct, pos, i, j, min=1000, n;
+  float awt=0, atat=0;
+  printf("\nEnter the number of process : ");
+  scanf("%d", &n);
+  p=(int*)malloc(n*sizeof(int));
+  at=(int*)malloc(n*sizeof(int));
+  bt=(int*)malloc(n*sizeof(int));
+  ct=(int*)malloc(n*sizeof(int));
+  wt=(int*)malloc(n*sizeof(int));
+  tat=(int*)malloc(n*sizeof(int));
+  printf("Enter the process : ");
+  for(i=0;i<n;i++)
+  {
+	scanf("%d",&p[i]);
+  }
+  printf("Enter the arrival time : ");
+  for(i=0;i<n;i++)
+  {
+	scanf("%d",&at[i]);
+  }
+  printf("Enter the burst time : ");
+  for(i=0;i<n;i++)
+  {
+	scanf("%d",&bt[i]);
+  }
+  sortat(p, at, bt, n);
+  ct[0]=at[0] + bt[0];
+  for(i=1; i<n; i++)
+  {
+	for(j=i; j<n; j++)
+	{
+	    if(at[j]<=ct[i-1])
+	   {
+              if(bt[j]<min)
+              {
+                 min=bt[j];
+                 pos=j;
+              }
+	   }
+	}
+   
+    swap(&p[i], &p[pos]);
+    swap(&at[i], &at[pos]);
+    swap(&bt[i], &bt[pos]);
+    min=1000;
+    ct[i]=ct[i-1]+bt[i];
+  }
+  tatwt(ct, at, bt, tat, wt, n);
+  printf("\np\t at\t bt\t ct\t tat\t wt"); 
+  for(i=0;i<n;i++)
+  {
+    printf("\n%d\t %d\t %d\t %d\t %d\t %d",p[i], at[i], bt[i], ct[i], tat[i], wt[i]);
+  }
+  for(i=0;i<n;i++)
+  { 
+    atat+=tat[i];
+    awt+=wt[i];
+  }
+  
+  atat=atat/n;
+  awt=awt/n;
+  printf("\n avg tat=%.2f and avg wt=%.2f",atat, awt); 
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+

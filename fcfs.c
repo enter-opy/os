@@ -1,40 +1,56 @@
 #include <stdio.h>
 
-int main(void) {
-	int n, clock = 0;
-	float tsum = 0, wsum = 0;
+int waitingtime(int proc[], int n,int burst_time[], int wait_time[]) 
+{  
+  wait_time[0] = 0;
+  for (int i = 1; i < n ; i++ )
+  wait_time[i] = burst_time[i-1] + wait_time[i-1] ;
+  return 0;
+}
 
-	printf("Enter number of processes: ");
-	scanf("%d", &n);
+int turnaroundtime( int proc[], int n,int burst_time[], int wait_time[], int tat[],int arrival[])
+ {   
+   int i;
+   for ( i = 0; i < n ; i++)
+   tat[i] = burst_time[i] + wait_time[i] - arrival[i];
 
-	int a[n][4];
+   return 0;
+ }
 
-	printf("Enter the arrival time and burst time of each process\n");
-	for (int i = 0; i < n; i++) {
-		printf("Enter arrival time of process%d: ", i);
-		scanf("%d", &a[i][0]);
-	
-		printf("Enter burst time of process%d: ", i);
-		scanf("%d", &a[i][1]);
-	}
-	
-	a[0][2] = a[0][1];
-	a[0][3] = 0;
-	clock = a[0][0] + a[0][1];
-	for (int i = 1; i < n; i++) {
-		clock += a[i][1];
-		a[i][2] = clock - a[i][0];
-		a[i][3] = a[i][2] - a[i][1]; 
-	}
+int avgtime( int proc[], int n, int burst_time[],int arrival[]) 
+ {
+   int wait_time[n], tat[n], total_wt = 0, total_tat = 0;
+   int i;  
+   waitingtime(proc, n, burst_time, wait_time,);   
+   turnaroundtime(proc, n, burst_time, wait_time,tat,arrival);  
+   printf("Process\tBurst\tArrival\tWaiting\tTurn around \n");   
+   for ( i=0; i<n; i++) 
+   {
+      total_wt = total_wt + wait_time[i];
+      total_tat = total_tat + tat[i];
+      printf(" %d\t  %d\t  %d\t  %d\t  %d\n", i+1, burst_time[i],arrival[i],wait_time[i],tat[i]);
+   }
+   printf("Average waiting time = %f\n", (float)total_wt / (float)n);
+   printf("Average turn around time = %f\n", (float)total_tat / (float)n);
+   return 0;
+}
 
-	printf("Process\tAT\tBT\tTAT\tWT\n");
+int main() 
+{
+ int n;
+ printf("\nEnter number of process : ");
+ scanf("%d",&n);
+ int burst[n],arrival[n],proc[n];
+ for(int i=0;i<n;i++)
+ {
+  proc[i]=i+1;
+  printf("Enter burst time for process %d : ",i+1);
+  scanf("%d",&burst[i]);
+  printf("Enter arrival time for process %d : ",i+1);
+  scanf("%d",&arrival[i]);
+ 
+ }  
+ avgtime(proc,n,burst,arrival);
+}
 
-	for (int i = 0; i < n; i++) {
-		printf("P%d\t%d\t%d\t%d\t%d\n", i, a[i][0], a[i][1], a[i][2], a[i][3]);
-		tsum += a[i][2];
-		wsum += a[i][3];
-	}
 
-	printf("Average turnaround time = %f\n", tsum / n);
-	printf("Average waiting time = %f\n", wsum / n);
-}	
